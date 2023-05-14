@@ -7,6 +7,7 @@
 #include "tasks/greyscale.h"
 #include "tasks/negative.h"
 #include "tasks/blur.h"
+#include "tasks/sobel.h"
 
 [[noreturn]] void fetch_frame(Camera& camera, WatchChannel<cv::Mat>& watchChannel) {
     while (true) {
@@ -40,16 +41,22 @@ int main() {
     WatchChannel<cv::Mat> grayscaleChannel;
     WatchChannel<cv::Mat> negativeChannel;
     WatchChannel<cv::Mat> blurChannel;
+    WatchChannel<cv::Mat> sobelXChannel;
+    WatchChannel<cv::Mat> sobelYChannel;
     int key_pressed;
 
     ProcessorState grayscaleProcessorState;
     ProcessorState negativeProcessorState;
     ProcessorState blurProcessorState;
+    ProcessorState sobelXProcessorState;
+    ProcessorState sobelYProcessorState;
 
     std::thread fetch_thread(fetch_frame, std::ref(camera), std::ref(watchChannel));
     std::thread grayscale_thread(grayscale_process, std::ref(watchChannel), std::ref(grayscaleChannel), std::ref(grayscaleProcessorState));
     std::thread negative_thread(negative_process, std::ref(watchChannel), std::ref(negativeChannel), std::ref(negativeProcessorState));
     std::thread blur_thread(blur_process, std::ref(watchChannel), std::ref(blurChannel), std::ref(blurProcessorState));
+    std::thread sobelX_thread(sobel_x_process, std::ref(watchChannel), std::ref(sobelXChannel), std::ref(sobelXProcessorState));
+    std::thread sobelY_thread(sobel_y_process, std::ref(watchChannel), std::ref(sobelYChannel), std::ref(sobelYProcessorState));
 
     bool is_running = true;
     while (is_running) {
@@ -57,6 +64,8 @@ int main() {
         display_channel(grayscaleChannel, WINDOW_NAME_GRAYSCALE);
         display_channel(negativeChannel, WINDOW_NAME_NEGATIVE);
         display_channel(blurChannel, WINDOW_NAME_BLUR);
+        display_channel(sobelXChannel, WINDOW_NAME_SOBEL_X);
+        display_channel(sobelYChannel, WINDOW_NAME_SOBEL_Y);
 
         key_pressed = cv::waitKey(1);
         switch (key_pressed) {
@@ -74,6 +83,8 @@ int main() {
                 std::cout << "GrayScale: " << grayscaleProcessorState.fps_counter << " fps (" << grayscaleProcessorState.frame_time << "ms )" << std::endl;
                 std::cout << "Negative: " << negativeProcessorState.fps_counter << " fps (" << negativeProcessorState.frame_time << "ms )" << std::endl;
                 std::cout << "Blur: " << blurProcessorState.fps_counter << " fps (" << blurProcessorState.frame_time << "ms )" << std::endl;
+                std::cout << "SobelX: " << sobelXProcessorState.fps_counter << " fps (" << sobelXProcessorState.frame_time << "ms )" << std::endl;
+                std::cout << "SobelY: " << sobelYProcessorState.fps_counter << " fps (" << sobelYProcessorState.frame_time << "ms )" << std::endl;
                 break;
             }
             case 103: { // g
