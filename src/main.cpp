@@ -8,6 +8,7 @@
 #include "tasks/negative.h"
 #include "tasks/blur.h"
 #include "tasks/sobel.h"
+#include "tasks/magnitude.h"
 
 [[noreturn]] void fetch_frame(Camera& camera, WatchChannel<cv::Mat>& watchChannel) {
     while (true) {
@@ -43,6 +44,7 @@ int main() {
     WatchChannel<cv::Mat> blurChannel;
     WatchChannel<cv::Mat> sobelXChannel;
     WatchChannel<cv::Mat> sobelYChannel;
+    WatchChannel<cv::Mat> magnitudeChannel;
     int key_pressed;
 
     ProcessorState grayscaleProcessorState;
@@ -50,6 +52,7 @@ int main() {
     ProcessorState blurProcessorState;
     ProcessorState sobelXProcessorState;
     ProcessorState sobelYProcessorState;
+    ProcessorState magnitudeProcessorState;
 
     std::thread fetch_thread(fetch_frame, std::ref(camera), std::ref(watchChannel));
     std::thread grayscale_thread(grayscale_process, std::ref(watchChannel), std::ref(grayscaleChannel), std::ref(grayscaleProcessorState));
@@ -57,6 +60,7 @@ int main() {
     std::thread blur_thread(blur_process, std::ref(watchChannel), std::ref(blurChannel), std::ref(blurProcessorState));
     std::thread sobelX_thread(sobel_x_process, std::ref(watchChannel), std::ref(sobelXChannel), std::ref(sobelXProcessorState));
     std::thread sobelY_thread(sobel_y_process, std::ref(watchChannel), std::ref(sobelYChannel), std::ref(sobelYProcessorState));
+    std::thread magnitude_thread(magnitude_process, std::ref(sobelXChannel), std::ref(sobelYChannel), std::ref(magnitudeChannel), std::ref(magnitudeProcessorState));
 
     bool is_running = true;
     while (is_running) {
@@ -66,6 +70,7 @@ int main() {
         display_channel(blurChannel, WINDOW_NAME_BLUR);
         display_channel(sobelXChannel, WINDOW_NAME_SOBEL_X);
         display_channel(sobelYChannel, WINDOW_NAME_SOBEL_Y);
+        display_channel(magnitudeChannel, WINDOW_NAME_MAGNITUDE);
 
         key_pressed = cv::waitKey(1);
         switch (key_pressed) {
@@ -85,6 +90,7 @@ int main() {
                 std::cout << "Blur: " << blurProcessorState.fps_counter << " fps (" << blurProcessorState.frame_time << "ms )" << std::endl;
                 std::cout << "SobelX: " << sobelXProcessorState.fps_counter << " fps (" << sobelXProcessorState.frame_time << "ms )" << std::endl;
                 std::cout << "SobelY: " << sobelYProcessorState.fps_counter << " fps (" << sobelYProcessorState.frame_time << "ms )" << std::endl;
+                std::cout << "Magnitude: " << magnitudeProcessorState.fps_counter << " fps (" << magnitudeProcessorState.frame_time << "ms )" << std::endl;
                 break;
             }
             case 103: { // g

@@ -43,4 +43,23 @@ void sobel_y(cv::Mat& input, cv::Mat& output) {
     apply_partial_kernel_col(intermediate, output, kernel_2, 1);
 }
 
+void magnitude(cv::Mat& sobel_input_1, cv::Mat& sobel_input_2, cv::Mat& output) {
+    if (sobel_input_1.rows != sobel_input_2.rows || sobel_input_1.cols != sobel_input_2.cols) {
+        throw std::invalid_argument("Sobel inputs must be the same size");
+    }
+
+    output = cv::Mat::zeros(sobel_input_1.rows, sobel_input_1.cols, CV_8UC3);
+
+    # pragma omp parallel for default(none) shared(sobel_input_1, sobel_input_2, output)
+    for (int row_idx = 0; row_idx < sobel_input_1.rows; row_idx++) {
+        for (int col_idx = 0; col_idx < sobel_input_1.cols; col_idx++) {
+            cv::Vec3b pixel_1 = sobel_input_1.at<cv::Vec3b>(row_idx, col_idx);
+            cv::Vec3b pixel_2 = sobel_input_2.at<cv::Vec3b>(row_idx, col_idx);
+
+            int magnitude = std::sqrt(std::pow(pixel_1[0], 2) + std::pow(pixel_2[0], 2));
+            output.at<cv::Vec3b>(row_idx, col_idx) = cv::Vec3b(magnitude, magnitude, magnitude);
+        }
+    }
+}
+
 #endif //VISION_CPP_FILTERS_H
