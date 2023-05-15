@@ -90,4 +90,27 @@ void quantize(cv::Mat& input, cv::Mat& output, int levels, bool blur = true) {
     }
 }
 
+void cartoonize(cv::Mat& quantized_input, cv::Mat& magnitude_input, cv::Mat& output, int magnitude_threshold) {
+    if (quantized_input.rows != magnitude_input.rows || quantized_input.cols != magnitude_input.cols) {
+        throw std::invalid_argument("Inputs must be the same size");
+    }
+
+    output = cv::Mat::zeros(quantized_input.rows, quantized_input.cols, CV_8UC3);
+
+    # pragma omp parallel for default(none) shared(quantized_input, magnitude_input, output, magnitude_threshold)
+    for (int row_idx = 0; row_idx < quantized_input.rows; row_idx++) {
+        for (int col_idx = 0; col_idx < quantized_input.cols; col_idx++) {
+            cv::Vec3b quantized_pixel = quantized_input.at<cv::Vec3b>(row_idx, col_idx);
+            cv::Vec3b magnitude_pixel = magnitude_input.at<cv::Vec3b>(row_idx, col_idx);
+
+            int magnitude = magnitude_pixel[0];
+            if (magnitude > magnitude_threshold) {
+                output.at<cv::Vec3b>(row_idx, col_idx) = cv::Vec3b(0, 0, 0);
+            } else {
+                output.at<cv::Vec3b>(row_idx, col_idx) = quantized_pixel;
+            }
+        }
+    }
+}
+
 #endif //VISION_CPP_FILTERS_H

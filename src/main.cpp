@@ -11,6 +11,7 @@
 #include "tasks/sobel.h"
 #include "tasks/magnitude.h"
 #include "tasks/quantize.h"
+#include "tasks/cartoonize.h"
 
 [[noreturn]] void fetch_frame(Camera& camera, WatchChannel<cv::Mat>& watchChannel) {
     while (true) {
@@ -34,6 +35,53 @@ int display_channel(WatchChannel<cv::Mat>& watchChannel, const std::string& wind
     cv::imshow(window_name, frame);
 
     return 0;
+}
+
+void stop_task(const std::string& task_name, std::unordered_map<std::string, Task*>& tasks, std::unordered_map<std::string, WatchChannel<cv::Mat>*>& channels) {
+    tasks[task_name]->set_running(false);
+    tasks.erase(task_name);
+    channels.erase(task_name);
+    cv::destroyWindow(task_name);
+
+    std::cout << "Stopped " << task_name << std::endl;
+}
+
+void start_sobel_tasks(std::unordered_map<std::string, Task*>& tasks, std::unordered_map<std::string, WatchChannel<cv::Mat>*>& channels) {
+    channels[SOBEL_X] = new WatchChannel<cv::Mat>();
+    auto* sobelXTask = new SobelXTask(*channels[SOBEL_X]);
+    tasks[SOBEL_X] = sobelXTask;
+    sobelXTask->start(*channels[MAIN]);
+
+    std::cout << "Started Sobel X" << std::endl;
+
+    channels[SOBEL_Y] = new WatchChannel<cv::Mat>();
+    auto* sobelYTask = new SobelYTask(*channels[SOBEL_Y]);
+    tasks[SOBEL_Y] = sobelYTask;
+    sobelYTask->start(*channels[MAIN]);
+
+    std::cout << "Started Sobel Y" << std::endl;
+
+    channels[MAGNITUDE] = new WatchChannel<cv::Mat>();
+    auto* magnitudeTask = new MagnitudeTask(*channels[MAGNITUDE]);
+    tasks[MAGNITUDE] = magnitudeTask;
+    magnitudeTask->start(*channels[SOBEL_X], *channels[SOBEL_Y]);
+
+    std::cout << "Started Magnitude" << std::endl;
+}
+
+void stop_sobel_tasks(std::unordered_map<std::string, Task*>& tasks, std::unordered_map<std::string, WatchChannel<cv::Mat>*>& channels) {
+    stop_task(SOBEL_X, tasks, channels);
+    stop_task(SOBEL_Y, tasks, channels);
+    stop_task(MAGNITUDE, tasks, channels);
+}
+
+void start_quantize_task(std::unordered_map<std::string, Task*>& tasks, std::unordered_map<std::string, WatchChannel<cv::Mat>*>& channels) {
+    channels[QUANTIZED] = new WatchChannel<cv::Mat>();
+    auto* quantizedTask = new QuantizedTask(*channels[QUANTIZED]);
+    tasks[QUANTIZED] = quantizedTask;
+    quantizedTask->start(*channels[MAIN]);
+
+    std::cout << "Started Quantized" << std::endl;
 }
 
 int main() {
@@ -82,6 +130,29 @@ int main() {
 
                 break;
             }
+            case 99: { // c
+                std::cout << "Key pressed: [C] " << key_pressed << std::endl;
+
+                if (tasks.find(CARTOONIZE) != tasks.end()) {
+                    stop_task(CARTOONIZE, tasks, channels);
+                } else {
+                    if (tasks.find(MAGNITUDE) == tasks.end()) {
+                        start_sobel_tasks(tasks, channels);
+                    }
+                    if (tasks.find(QUANTIZED) == tasks.end()) {
+                        start_quantize_task(tasks, channels);
+                    }
+
+                    channels[CARTOONIZE] = new WatchChannel<cv::Mat>();
+                    auto* cartoonizeTask = new CartoonizeTask(*channels[CARTOONIZE]);
+                    tasks[CARTOONIZE] = cartoonizeTask;
+                    cartoonizeTask->start(*channels[QUANTIZED], *channels[MAGNITUDE]);
+
+                    std::cout << "Started Cartoonize" << std::endl;
+                }
+
+                break;
+            }
             case 102: { // f
                 std::cout << "Key pressed: [F] " << key_pressed << std::endl;
                 for (auto& pair : tasks) {
@@ -100,11 +171,7 @@ int main() {
 
                     std::cout << "Started Grayscale" << std::endl;
                 } else {
-                    tasks.erase(GRAYSCALE);
-                    channels.erase(GRAYSCALE);
-                    cv::destroyWindow(GRAYSCALE);
-
-                    std::cout << "Stopped Grayscale" << std::endl;
+                    stop_task(GRAYSCALE, tasks, channels);
                 }
 
                 break;
@@ -120,11 +187,7 @@ int main() {
 
                     std::cout << "Started Negative" << std::endl;
                 } else {
-                    tasks.erase(NEGATIVE);
-                    channels.erase(NEGATIVE);
-                    cv::destroyWindow(NEGATIVE);
-
-                    std::cout << "Stopped Negative" << std::endl;
+                    stop_task(NEGATIVE, tasks, channels);
                 }
 
                 break;
@@ -133,18 +196,9 @@ int main() {
                 std::cout << "Key pressed: [Q] " << key_pressed << std::endl;
 
                 if (tasks.find(QUANTIZED) == tasks.end()) {
-                    channels[QUANTIZED] = new WatchChannel<cv::Mat>();
-                    auto* quantizedTask = new QuantizedTask(*channels[QUANTIZED]);
-                    tasks[QUANTIZED] = quantizedTask;
-                    quantizedTask->start(*channels[MAIN]);
-
-                    std::cout << "Started Quantized" << std::endl;
+                    start_quantize_task(tasks, channels);
                 } else {
-                    tasks.erase(QUANTIZED);
-                    channels.erase(QUANTIZED);
-                    cv::destroyWindow(QUANTIZED);
-
-                    std::cout << "Stopped Quantized" << std::endl;
+                    stop_task(QUANTIZED, tasks, channels);
                 }
 
 
@@ -154,49 +208,11 @@ int main() {
                 std::cout << "Key pressed: [S] " << key_pressed << std::endl;
 
                 if (tasks.find(SOBEL_X) == tasks.end()) {
-                    channels[SOBEL_X] = new WatchChannel<cv::Mat>();
-                    auto* sobelXTask = new SobelXTask(*channels[SOBEL_X]);
-                    tasks[SOBEL_X] = sobelXTask;
-                    sobelXTask->start(*channels[MAIN]);
-
-                    std::cout << "Started Sobel X" << std::endl;
+                    start_sobel_tasks(tasks, channels);
                 } else {
-                    tasks.erase(SOBEL_X);
-                    channels.erase(SOBEL_X);
-                    cv::destroyWindow(SOBEL_X);
-
-                    std::cout << "Stopped Sobel X" << std::endl;
+                    stop_sobel_tasks(tasks, channels);
                 }
 
-                if (tasks.find(SOBEL_Y) == tasks.end()) {
-                    channels[SOBEL_Y] = new WatchChannel<cv::Mat>();
-                    auto* sobelYTask = new SobelYTask(*channels[SOBEL_Y]);
-                    tasks[SOBEL_Y] = sobelYTask;
-                    sobelYTask->start(*channels[MAIN]);
-
-                    std::cout << "Started Sobel Y" << std::endl;
-                } else {
-                    tasks.erase(SOBEL_Y);
-                    channels.erase(SOBEL_Y);
-                    cv::destroyWindow(SOBEL_Y);
-
-                    std::cout << "Stopped Sobel Y" << std::endl;
-                }
-
-                if (tasks.find(MAGNITUDE) == tasks.end()) {
-                    channels[MAGNITUDE] = new WatchChannel<cv::Mat>();
-                    auto* magnitudeTask = new MagnitudeTask(*channels[MAGNITUDE]);
-                    tasks[MAGNITUDE] = magnitudeTask;
-                    magnitudeTask->start(*channels[SOBEL_X], *channels[SOBEL_Y]);
-
-                    std::cout << "Started Magnitude" << std::endl;
-                } else {
-                    tasks.erase(MAGNITUDE);
-                    channels.erase(MAGNITUDE);
-                    cv::destroyWindow(MAGNITUDE);
-
-                    std::cout << "Stopped Magnitude" << std::endl;
-                }
                 break;
             }
             default:

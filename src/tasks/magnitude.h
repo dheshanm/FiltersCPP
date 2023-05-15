@@ -27,7 +27,7 @@ void magnitude_process(WatchChannel<cv::Mat>& input_channel_1, WatchChannel<cv::
     DualInputProcessor processor("Magnitude", &processorState);
 
     processor.register_callback(magnitude_task);
-    processor.start(input_channel_1, input_channel_1, output_channel);
+    processor.start(input_channel_1, input_channel_2, output_channel);
 }
 
 class MagnitudeTask : public Task {

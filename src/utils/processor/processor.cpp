@@ -40,7 +40,7 @@ int Processor::start(WatchChannel<cv::Mat> &input, WatchChannel<cv::Mat> &output
 
     while (true) {
         if (!this->state->running) {
-            continue;
+            return 0;
         }
         auto frame_time_start = std::chrono::high_resolution_clock::now();
         frames_counter++;
@@ -57,6 +57,8 @@ int Processor::start(WatchChannel<cv::Mat> &input, WatchChannel<cv::Mat> &output
 
         this->state->frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - frame_time_start).count();
     }
+
+    return -1;
 }
 
 Processor::~Processor() = default;
@@ -86,7 +88,7 @@ int DualInputProcessor::start(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::M
 
     while (true) {
         if (!this->state->running) {
-            continue;
+            return 0;
         }
         auto frame_time_start = std::chrono::high_resolution_clock::now();
         frames_counter++;
@@ -103,6 +105,8 @@ int DualInputProcessor::start(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::M
 
         this->state->frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - frame_time_start).count();
     }
+
+    return -1;
 }
 
 DualInputProcessor::~DualInputProcessor() = default;

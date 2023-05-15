@@ -57,7 +57,9 @@ ProcessorState Task::get_state() {
 
 
 Task::~Task() {
+    std::cout << "Destroying task " << name << std::endl;
     cv::destroyWindow(name);
+    processorState.running = false;
 }
 
 #endif //VISION_CPP_TASK_H
