@@ -3,7 +3,7 @@ project(vision_cpp)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(app src/main.cpp src/utils/camera/camera.cpp src/utils/camera/camera.h src/utils/filters.h src/utils/watch_channel.h src/utils/processor/processor.cpp src/utils/processor/processor.h src/constants.h src/tasks/greyscale.h src/tasks/blur.h src/tasks/negative.h src/tasks/sobel.h src/utils/kernels.h src/tasks/magnitude.h)
+add_executable(app src/main.cpp src/utils/camera/camera.cpp src/utils/camera/camera.h src/utils/filters.h src/utils/watch_channel.h src/utils/processor/processor.cpp src/utils/processor/processor.h src/constants.h src/tasks/greyscale.h src/tasks/blur.h src/tasks/negative.h src/tasks/sobel.h src/utils/kernels.h src/tasks/magnitude.h src/tasks/task.h)
 
 # OpenCV
 FIND_PACKAGE( OpenCV REQUIRED )

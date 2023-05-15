@@ -8,6 +8,8 @@
 #include <opencv2/opencv.hpp>
 #include "../utils/processor/processor.h"
 #include "../utils/filters.h"
+#include "task.h"
+#include "../constants.h"
 
 void grayscale_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel) {
     cv::Mat frame;
@@ -26,5 +28,14 @@ void grayscale_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat
     processor.register_callback(grayscale_task);
     processor.start(inputChannel, outputChannel);
 }
+
+class GrayscaleTask : public Task {
+public:
+    explicit GrayscaleTask(WatchChannel<cv::Mat> &outputChannel) : Task(GRAYSCALE, outputChannel) {}
+
+    void start(WatchChannel<cv::Mat>& input) {
+        processorThread = std::thread(grayscale_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    }
+};
 
 #endif //VISION_CPP_GREYSCALE_H

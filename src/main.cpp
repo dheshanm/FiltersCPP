@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <thread>
+#include <unordered_map>
 
 #include "constants.h"
 #include "utils/camera/camera.h"
@@ -38,39 +39,22 @@ int main() {
     Camera camera(0);
     camera.set_fps(30);
 
-    WatchChannel<cv::Mat> watchChannel;
-    WatchChannel<cv::Mat> grayscaleChannel;
-    WatchChannel<cv::Mat> negativeChannel;
-    WatchChannel<cv::Mat> blurChannel;
-    WatchChannel<cv::Mat> sobelXChannel;
-    WatchChannel<cv::Mat> sobelYChannel;
-    WatchChannel<cv::Mat> magnitudeChannel;
+    std::unordered_map<std::string, WatchChannel<cv::Mat>*> channels;
+    std::unordered_map<std::string, Task*> tasks;
+
+    channels[MAIN] = new WatchChannel<cv::Mat>();
+
     int key_pressed;
 
-    ProcessorState grayscaleProcessorState;
-    ProcessorState negativeProcessorState;
-    ProcessorState blurProcessorState;
-    ProcessorState sobelXProcessorState;
-    ProcessorState sobelYProcessorState;
-    ProcessorState magnitudeProcessorState;
-
-    std::thread fetch_thread(fetch_frame, std::ref(camera), std::ref(watchChannel));
-    std::thread grayscale_thread(grayscale_process, std::ref(watchChannel), std::ref(grayscaleChannel), std::ref(grayscaleProcessorState));
-    std::thread negative_thread(negative_process, std::ref(watchChannel), std::ref(negativeChannel), std::ref(negativeProcessorState));
-    std::thread blur_thread(blur_process, std::ref(watchChannel), std::ref(blurChannel), std::ref(blurProcessorState));
-    std::thread sobelX_thread(sobel_x_process, std::ref(watchChannel), std::ref(sobelXChannel), std::ref(sobelXProcessorState));
-    std::thread sobelY_thread(sobel_y_process, std::ref(watchChannel), std::ref(sobelYChannel), std::ref(sobelYProcessorState));
-    std::thread magnitude_thread(magnitude_process, std::ref(sobelXChannel), std::ref(sobelYChannel), std::ref(magnitudeChannel), std::ref(magnitudeProcessorState));
+    std::thread fetch_thread(fetch_frame, std::ref(camera), std::ref(*channels[MAIN]));
 
     bool is_running = true;
     while (is_running) {
-        display_channel(watchChannel, WINDOW_NAME);
-        display_channel(grayscaleChannel, WINDOW_NAME_GRAYSCALE);
-        display_channel(negativeChannel, WINDOW_NAME_NEGATIVE);
-        display_channel(blurChannel, WINDOW_NAME_BLUR);
-        display_channel(sobelXChannel, WINDOW_NAME_SOBEL_X);
-        display_channel(sobelYChannel, WINDOW_NAME_SOBEL_Y);
-        display_channel(magnitudeChannel, WINDOW_NAME_MAGNITUDE);
+        display_channel(*channels[MAIN], MAIN);
+
+        for (auto& pair : tasks) {
+            pair.second->display();
+        }
 
         key_pressed = cv::waitKey(1);
         switch (key_pressed) {
@@ -79,36 +63,125 @@ int main() {
             }
             case 98: { // b
                 std::cout << "Key pressed: [B] " << key_pressed << std::endl;
-                blurProcessorState.running = !blurProcessorState.running;
-                std::cout << "Toggling Blur: running:" << blurProcessorState.running << std::endl;
+
+                if (tasks.find(BLUR) == tasks.end()) {
+                    channels[BLUR] = new WatchChannel<cv::Mat>();
+                    auto* blurTask = new BlurTask(*channels[BLUR]);
+                    tasks[BLUR] = blurTask;
+                    blurTask->start(*channels[MAIN]);
+
+                    std::cout << "Started Blur" << std::endl;
+                } else {
+                    tasks.erase(BLUR);
+                    channels.erase(BLUR);
+                    cv::destroyWindow(BLUR);
+
+                    std::cout << "Stopped Blur" << std::endl;
+                }
+
                 break;
             }
             case 102: { // f
                 std::cout << "Key pressed: [F] " << key_pressed << std::endl;
-                std::cout << "GrayScale: " << grayscaleProcessorState.fps_counter << " fps (" << grayscaleProcessorState.frame_time << "ms )" << std::endl;
-                std::cout << "Negative: " << negativeProcessorState.fps_counter << " fps (" << negativeProcessorState.frame_time << "ms )" << std::endl;
-                std::cout << "Blur: " << blurProcessorState.fps_counter << " fps (" << blurProcessorState.frame_time << "ms )" << std::endl;
-                std::cout << "SobelX: " << sobelXProcessorState.fps_counter << " fps (" << sobelXProcessorState.frame_time << "ms )" << std::endl;
-                std::cout << "SobelY: " << sobelYProcessorState.fps_counter << " fps (" << sobelYProcessorState.frame_time << "ms )" << std::endl;
-                std::cout << "Magnitude: " << magnitudeProcessorState.fps_counter << " fps (" << magnitudeProcessorState.frame_time << "ms )" << std::endl;
+                for (auto& pair : tasks) {
+                    std::cout<< pair.first << ": " << pair.second->get_state().fps_counter << " fps (" << pair.second->get_state().frame_time << "ms )" << std::endl;
+                }
                 break;
             }
             case 103: { // g
                 std::cout << "Key pressed: [G] " << key_pressed << std::endl;
-                grayscaleProcessorState.running = !grayscaleProcessorState.running;
-                std::cout << "Toggling Grayscale: running:" << grayscaleProcessorState.running << std::endl;
+
+                if (tasks.find(GRAYSCALE) == tasks.end()) {
+                    channels[GRAYSCALE] = new WatchChannel<cv::Mat>();
+                    auto* grayscaleTask = new GrayscaleTask(*channels[GRAYSCALE]);
+                    tasks[GRAYSCALE] = grayscaleTask;
+                    grayscaleTask->start(*channels[MAIN]);
+
+                    std::cout << "Started Grayscale" << std::endl;
+                } else {
+                    tasks.erase(GRAYSCALE);
+                    channels.erase(GRAYSCALE);
+                    cv::destroyWindow(GRAYSCALE);
+
+                    std::cout << "Stopped Grayscale" << std::endl;
+                }
+
                 break;
             }
             case 110: { // n
                 std::cout << "Key pressed: [N] " << key_pressed << std::endl;
-                negativeProcessorState.running = !negativeProcessorState.running;
-                std::cout << "Toggling Negative: running:" << negativeProcessorState.running << std::endl;
+
+                if (tasks.find(NEGATIVE) == tasks.end()) {
+                    channels[NEGATIVE] = new WatchChannel<cv::Mat>();
+                    auto* negativeTask = new NegativeTask(*channels[NEGATIVE]);
+                    tasks[NEGATIVE] = negativeTask;
+                    negativeTask->start(*channels[MAIN]);
+
+                    std::cout << "Started Negative" << std::endl;
+                } else {
+                    tasks.erase(NEGATIVE);
+                    channels.erase(NEGATIVE);
+                    cv::destroyWindow(NEGATIVE);
+
+                    std::cout << "Stopped Negative" << std::endl;
+                }
+
+                break;
+            }
+            case 115: { // s
+                std::cout << "Key pressed: [S] " << key_pressed << std::endl;
+
+                if (tasks.find(SOBEL_X) == tasks.end()) {
+                    channels[SOBEL_X] = new WatchChannel<cv::Mat>();
+                    auto* sobelXTask = new SobelXTask(*channels[SOBEL_X]);
+                    tasks[SOBEL_X] = sobelXTask;
+                    sobelXTask->start(*channels[MAIN]);
+
+                    std::cout << "Started Sobel X" << std::endl;
+                } else {
+                    tasks.erase(SOBEL_X);
+                    channels.erase(SOBEL_X);
+                    cv::destroyWindow(SOBEL_X);
+
+                    std::cout << "Stopped Sobel X" << std::endl;
+                }
+
+                if (tasks.find(SOBEL_Y) == tasks.end()) {
+                    channels[SOBEL_Y] = new WatchChannel<cv::Mat>();
+                    auto* sobelYTask = new SobelYTask(*channels[SOBEL_Y]);
+                    tasks[SOBEL_Y] = sobelYTask;
+                    sobelYTask->start(*channels[MAIN]);
+
+                    std::cout << "Started Sobel Y" << std::endl;
+                } else {
+                    tasks.erase(SOBEL_Y);
+                    channels.erase(SOBEL_Y);
+                    cv::destroyWindow(SOBEL_Y);
+
+                    std::cout << "Stopped Sobel Y" << std::endl;
+                }
+
+                if (tasks.find(MAGNITUDE) == tasks.end()) {
+                    channels[MAGNITUDE] = new WatchChannel<cv::Mat>();
+                    auto* magnitudeTask = new MagnitudeTask(*channels[MAGNITUDE]);
+                    tasks[MAGNITUDE] = magnitudeTask;
+                    magnitudeTask->start(*channels[SOBEL_X], *channels[SOBEL_Y]);
+
+                    std::cout << "Started Magnitude" << std::endl;
+                } else {
+                    tasks.erase(MAGNITUDE);
+                    channels.erase(MAGNITUDE);
+                    cv::destroyWindow(MAGNITUDE);
+
+                    std::cout << "Stopped Magnitude" << std::endl;
+                }
                 break;
             }
             default:
                 std::cout << "Key pressed: " << key_pressed << std::endl;
                 std::cout << "Exiting..." << std::endl;
                 is_running = false;
+                cv::destroyAllWindows();
                 break;
         }
     }

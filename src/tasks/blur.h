@@ -29,4 +29,13 @@ void blur_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& ou
     processor.start(inputChannel, outputChannel);
 }
 
+class BlurTask : public Task {
+public:
+    explicit BlurTask(WatchChannel<cv::Mat> &outputChannel) : Task(BLUR, outputChannel) {}
+
+    void start(WatchChannel<cv::Mat>& input) {
+        processorThread = std::thread(blur_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    }
+};
+
 #endif //VISION_CPP_BLUR_H

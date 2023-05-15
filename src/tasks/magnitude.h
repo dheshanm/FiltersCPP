@@ -30,4 +30,13 @@ void magnitude_process(WatchChannel<cv::Mat>& input_channel_1, WatchChannel<cv::
     processor.start(input_channel_1, input_channel_1, output_channel);
 }
 
+class MagnitudeTask : public Task {
+public:
+    explicit MagnitudeTask(WatchChannel<cv::Mat> &outputChannel) : Task(MAGNITUDE, outputChannel) {}
+
+    void start(WatchChannel<cv::Mat>& input_1, WatchChannel<cv::Mat>& input_2) {
+        processorThread = std::thread(magnitude_process, std::ref(input_1), std::ref(input_2), std::ref(*outputChannel), std::ref(processorState));
+    }
+};
+
 #endif //VISION_CPP_MAGNITUDE_H

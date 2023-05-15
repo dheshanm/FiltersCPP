@@ -29,4 +29,13 @@ void negative_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>
     processor.start(inputChannel, outputChannel);
 }
 
+class NegativeTask : public Task {
+public:
+    explicit NegativeTask(WatchChannel<cv::Mat> &outputChannel) : Task(NEGATIVE, outputChannel) {}
+
+    void start(WatchChannel<cv::Mat>& input) {
+        processorThread = std::thread(negative_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    }
+};
+
 #endif //VISION_CPP_NEGATIVE_H
