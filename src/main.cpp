@@ -37,31 +37,37 @@ int display_channel(WatchChannel<cv::Mat>& watchChannel, const std::string& wind
     return 0;
 }
 
+void create_channel(std::unordered_map<std::string, WatchChannel<cv::Mat>*>& channels, const std::string& channel_name) {
+    if (channels.find(channel_name) != channels.end()) {
+        return;
+    }
+    channels[channel_name] = new WatchChannel<cv::Mat>();
+}
+
 void stop_task(const std::string& task_name, std::unordered_map<std::string, Task*>& tasks, std::unordered_map<std::string, WatchChannel<cv::Mat>*>& channels) {
     tasks[task_name]->set_running(false);
     tasks.erase(task_name);
-    channels.erase(task_name);
     cv::destroyWindow(task_name);
 
     std::cout << "Stopped " << task_name << std::endl;
 }
 
 void start_sobel_tasks(std::unordered_map<std::string, Task*>& tasks, std::unordered_map<std::string, WatchChannel<cv::Mat>*>& channels) {
-    channels[SOBEL_X] = new WatchChannel<cv::Mat>();
+    create_channel(channels, SOBEL_X);
     auto* sobelXTask = new SobelXTask(*channels[SOBEL_X]);
     tasks[SOBEL_X] = sobelXTask;
     sobelXTask->start(*channels[MAIN]);
 
     std::cout << "Started Sobel X" << std::endl;
 
-    channels[SOBEL_Y] = new WatchChannel<cv::Mat>();
+    create_channel(channels, SOBEL_Y);
     auto* sobelYTask = new SobelYTask(*channels[SOBEL_Y]);
     tasks[SOBEL_Y] = sobelYTask;
     sobelYTask->start(*channels[MAIN]);
 
     std::cout << "Started Sobel Y" << std::endl;
 
-    channels[MAGNITUDE] = new WatchChannel<cv::Mat>();
+    create_channel(channels, MAGNITUDE);
     auto* magnitudeTask = new MagnitudeTask(*channels[MAGNITUDE]);
     tasks[MAGNITUDE] = magnitudeTask;
     magnitudeTask->start(*channels[SOBEL_X], *channels[SOBEL_Y]);
@@ -114,7 +120,7 @@ int main() {
                 std::cout << "Key pressed: [B] " << key_pressed << std::endl;
 
                 if (tasks.find(BLUR) == tasks.end()) {
-                    channels[BLUR] = new WatchChannel<cv::Mat>();
+                    create_channel(channels, BLUR);
                     auto* blurTask = new BlurTask(*channels[BLUR]);
                     tasks[BLUR] = blurTask;
                     blurTask->start(*channels[MAIN]);
@@ -143,7 +149,7 @@ int main() {
                         start_quantize_task(tasks, channels);
                     }
 
-                    channels[CARTOONIZE] = new WatchChannel<cv::Mat>();
+                    create_channel(channels, CARTOONIZE);
                     auto* cartoonizeTask = new CartoonizeTask(*channels[CARTOONIZE]);
                     tasks[CARTOONIZE] = cartoonizeTask;
                     cartoonizeTask->start(*channels[QUANTIZED], *channels[MAGNITUDE]);
@@ -164,7 +170,7 @@ int main() {
                 std::cout << "Key pressed: [G] " << key_pressed << std::endl;
 
                 if (tasks.find(GRAYSCALE) == tasks.end()) {
-                    channels[GRAYSCALE] = new WatchChannel<cv::Mat>();
+                    create_channel(channels, GRAYSCALE);
                     auto* grayscaleTask = new GrayscaleTask(*channels[GRAYSCALE]);
                     tasks[GRAYSCALE] = grayscaleTask;
                     grayscaleTask->start(*channels[MAIN]);
@@ -180,7 +186,7 @@ int main() {
                 std::cout << "Key pressed: [N] " << key_pressed << std::endl;
 
                 if (tasks.find(NEGATIVE) == tasks.end()) {
-                    channels[NEGATIVE] = new WatchChannel<cv::Mat>();
+                    create_channel(channels, NEGATIVE);
                     auto* negativeTask = new NegativeTask(*channels[NEGATIVE]);
                     tasks[NEGATIVE] = negativeTask;
                     negativeTask->start(*channels[MAIN]);
