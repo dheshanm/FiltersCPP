@@ -62,4 +62,32 @@ void magnitude(cv::Mat& sobel_input_1, cv::Mat& sobel_input_2, cv::Mat& output) 
     }
 }
 
+void quantize(cv::Mat& input, cv::Mat& output, int levels, bool blur = true) {
+    if (levels < 2) {
+        throw std::invalid_argument("Levels must be greater than 1");
+    }
+
+    int bins_count = 255 / levels;
+
+    // blur the image to reduce noise
+    if (blur) {
+        cv::Mat blurred = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
+        cv::GaussianBlur(input, blurred, cv::Size(5, 5), 0);
+        input = blurred;
+    }
+
+    output = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
+
+    # pragma omp parallel for default(none) shared(input, output, bins_count)
+    for (int row_idx = 0; row_idx < input.rows; row_idx++) {
+        for (int col_idx = 0; col_idx < input.cols; col_idx++) {
+            cv::Vec3b pixel = input.at<cv::Vec3b>(row_idx, col_idx);
+            for (int channel_idx = 0; channel_idx < 3; channel_idx++) {
+                int quantized = std::round(pixel[channel_idx] / bins_count) * bins_count;
+                output.at<cv::Vec3b>(row_idx, col_idx)[channel_idx] = quantized;
+            }
+        }
+    }
+}
+
 #endif //VISION_CPP_FILTERS_H

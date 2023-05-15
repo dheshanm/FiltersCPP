@@ -14,5 +14,6 @@ const std::string BLUR = "Blur";
 const std::string SOBEL_X = "Sobel X";
 const std::string SOBEL_Y = "Sobel Y";
 const std::string MAGNITUDE = "Magnitude";
+const std::string QUANTIZED = "Quantized";
 
 #endif //VISION_CPP_CONSTANTS_H

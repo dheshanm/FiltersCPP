@@ -10,6 +10,7 @@
 #include "tasks/blur.h"
 #include "tasks/sobel.h"
 #include "tasks/magnitude.h"
+#include "tasks/quantize.h"
 
 [[noreturn]] void fetch_frame(Camera& camera, WatchChannel<cv::Mat>& watchChannel) {
     while (true) {
@@ -125,6 +126,27 @@ int main() {
 
                     std::cout << "Stopped Negative" << std::endl;
                 }
+
+                break;
+            }
+            case 113: { // q
+                std::cout << "Key pressed: [Q] " << key_pressed << std::endl;
+
+                if (tasks.find(QUANTIZED) == tasks.end()) {
+                    channels[QUANTIZED] = new WatchChannel<cv::Mat>();
+                    auto* quantizedTask = new QuantizedTask(*channels[QUANTIZED]);
+                    tasks[QUANTIZED] = quantizedTask;
+                    quantizedTask->start(*channels[MAIN]);
+
+                    std::cout << "Started Quantized" << std::endl;
+                } else {
+                    tasks.erase(QUANTIZED);
+                    channels.erase(QUANTIZED);
+                    cv::destroyWindow(QUANTIZED);
+
+                    std::cout << "Stopped Quantized" << std::endl;
+                }
+
 
                 break;
             }
