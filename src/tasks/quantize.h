@@ -21,7 +21,7 @@ void quantize_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& o
     }
 
     cv::Mat output_frame;
-    quantize(frame, output_frame, 15);
+    quantize(frame, output_frame, 10);
     outputChannel.write(output_frame);
 }
 

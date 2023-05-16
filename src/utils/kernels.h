@@ -7,6 +7,15 @@
 
 #include <opencv2/opencv.hpp>
 
+/**
+ * Returns a valid index for accessing an array or matrix element, given an index, an offset and a maximum value.
+ * The function ensures that the result is within the range [0, max) by wrapping around the boundaries.
+ * For example, if index = 0, offset = -1 and max = 10, the result is 9. If index = 9, offset = 1 and max = 10, the result is 0.
+ * @param index The original index of the element.
+ * @param offset The offset to be added to the index.
+ * @param max The maximum value of the index (exclusive).
+ * @return A valid index that is within the range [0, max).
+ */
 int get_valid_index(int index, int offset, int max) {
     int result = index + offset;
     if (result < 0) {
@@ -18,6 +27,17 @@ int get_valid_index(int index, int offset, int max) {
     }
 }
 
+/**
+ * Applies a partial kernel to a row of an input image and stores the result in an output image.
+ * The partial kernel is a one-dimensional vector of integers that represents a convolution filter.
+ * The function performs a weighted sum of the pixel values in the row and its neighboring rows, using the kernel values as weights.
+ * The function also normalizes the result by dividing it by the sum of the kernel values, or by 1 if the sum is zero.
+ * The function uses OpenMP directives to parallelize the computation for each row.
+ * @param input The input image (a matrix of 3-channel pixels).
+ * @param output The output image (a matrix of 3-channel pixels).
+ * @param kernel The partial kernel (a vector of integers).
+ * @param kernel_offset The offset of the kernel from the center of the row. For example, if kernel_offset = 1, then the kernel is applied to the row and its upper neighbor. If kernel_offset = 2, then the kernel is applied to the row and its upper and upper-upper neighbors.
+ */
 void apply_partial_kernel_row(cv::Mat& input, cv::Mat& output, std::vector<int>& kernel, int kernel_offset) {
     int kernel_sum = 0;
     for (int i : kernel) {
@@ -50,6 +70,17 @@ void apply_partial_kernel_row(cv::Mat& input, cv::Mat& output, std::vector<int>&
     }
 }
 
+/**
+ * Applies a partial kernel to a column of an input image and stores the result in an output image.
+ * The partial kernel is a one-dimensional vector of integers that represents a convolution filter.
+ * The function performs a weighted sum of the pixel values in the column and its neighboring columns, using the kernel values as weights.
+ * The function also normalizes the result by dividing it by the sum of the kernel values, or by 1 if the sum is zero.
+ * The function uses OpenMP directives to parallelize the computation for each column.
+ * @param input The input image (a matrix of 3-channel pixels).
+ * @param output The output image (a matrix of 3-channel pixels).
+ * @param kernel The partial kernel (a vector of integers).
+ * @param kernel_offset The offset of the kernel from the center of the column. For example, if kernel_offset = 1, then the kernel is applied to the column and its left neighbor. If kernel_offset = 2, then the kernel is applied to the column and its left and left-left neighbors.
+ */
 void apply_partial_kernel_col(cv::Mat& input, cv::Mat& output, std::vector<int>& kernel, int kernel_offset) {
     int kernel_sum = 0;
     for (int i: kernel) {
@@ -81,6 +112,20 @@ void apply_partial_kernel_col(cv::Mat& input, cv::Mat& output, std::vector<int>&
     }
 }
 
+/**
+ * Applies a full kernel to an input image and stores the result in an output image.
+ * The kernel is a two-dimensional matrix of integers that represents a convolution filter.
+ * The function performs a weighted sum of the pixel values in the image and its neighboring pixels, using the kernel values as weights.
+ * The function also normalizes the result by dividing it by the sum of the kernel values, or by 1 if the sum is zero.
+ * The function uses OpenMP directives to parallelize the computation for each row.
+ *
+ * This function used a partial kernel to apply the kernel to each row, and then uses the same partial kernel to apply the kernel to each column.
+ *
+ * @param input The input image (a matrix of 3-channel pixels).
+ * @param output The output image (a matrix of 3-channel pixels).
+ * @param kernel The kernel to be used for both rows and columns (a vector of integers).
+ * @param kernel_offset The offset of the kernel from the center of each pixel. For example, if kernel_offset = 1, then the kernel is a 3x3 matrix. If kernel_offset = 2, then the kernel is a 5x5 matrix.
+ */
 void apply_kernel(cv::Mat& input, cv::Mat& output, std::vector<int>& kernel, int kernel_offset) {
     cv::Mat intermediate = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
     output = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
