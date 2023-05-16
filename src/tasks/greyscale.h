@@ -11,7 +11,7 @@
 #include "task.h"
 #include "../constants.h"
 
-void grayscale_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel) {
+void grayscale_task(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel) {
     cv::Mat frame;
     inputChannel.read(frame);
     if (frame.empty()) {
@@ -22,7 +22,8 @@ void grayscale_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& 
     outputChannel.write(grayscale_frame);
 }
 
-void grayscale_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel, ProcessorState& processorState) {
+void grayscale_process(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel,
+                       ProcessorState &processorState) {
     Processor processor("Grayscale", &processorState);
 
     processor.register_callback(grayscale_task);
@@ -33,8 +34,9 @@ class GrayscaleTask : public Task {
 public:
     explicit GrayscaleTask(WatchChannel<cv::Mat> &outputChannel) : Task(GRAYSCALE, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& input) {
-        processorThread = std::thread(grayscale_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &input) {
+        processorThread = std::thread(grayscale_process, std::ref(input), std::ref(*outputChannel),
+                                      std::ref(processorState));
     }
 };
 

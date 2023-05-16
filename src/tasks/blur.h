@@ -10,7 +10,7 @@
 #include "../utils/filters.h"
 #include "../utils/processor/processor.h"
 
-void blur_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel) {
+void blur_task(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel) {
     cv::Mat frame;
     inputChannel.read(frame);
     if (frame.empty()) {
@@ -22,7 +22,8 @@ void blur_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outpu
     outputChannel.write(blur_frame);
 }
 
-void blur_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel, ProcessorState& processorState) {
+void blur_process(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel,
+                  ProcessorState &processorState) {
     Processor processor("Blur", &processorState);
 
     processor.register_callback(blur_task);
@@ -33,8 +34,9 @@ class BlurTask : public Task {
 public:
     explicit BlurTask(WatchChannel<cv::Mat> &outputChannel) : Task(BLUR, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& input) {
-        processorThread = std::thread(blur_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &input) {
+        processorThread = std::thread(blur_process, std::ref(input), std::ref(*outputChannel),
+                                      std::ref(processorState));
     }
 };
 

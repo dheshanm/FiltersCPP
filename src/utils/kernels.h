@@ -38,9 +38,9 @@ int get_valid_index(int index, int offset, int max) {
  * @param kernel The partial kernel (a vector of integers).
  * @param kernel_offset The offset of the kernel from the center of the row. For example, if kernel_offset = 1, then the kernel is applied to the row and its upper neighbor. If kernel_offset = 2, then the kernel is applied to the row and its upper and upper-upper neighbors.
  */
-void apply_partial_kernel_row(cv::Mat& input, cv::Mat& output, std::vector<int>& kernel, int kernel_offset) {
+void apply_partial_kernel_row(cv::Mat &input, cv::Mat &output, std::vector<int> &kernel, int kernel_offset) {
     int kernel_sum = 0;
-    for (int i : kernel) {
+    for (int i: kernel) {
         kernel_sum += i;
     }
     if (kernel_sum == 0) {
@@ -50,7 +50,7 @@ void apply_partial_kernel_row(cv::Mat& input, cv::Mat& output, std::vector<int>&
 #pragma omp parallel for default(none) shared(kernel_offset, input, output, kernel, kernel_sum)
     for (int row = 0; row < input.rows; row++) {
         for (int col = 0; col < input.cols; col++) {
-            cv::Vec3i buffer_result = cv::Vec3i {0, 0, 0};
+            cv::Vec3i buffer_result = cv::Vec3i{0, 0, 0};
 
             int kernel_idx = 0;
             for (int row_offset = -kernel_offset; row_offset <= kernel_offset; row_offset++) {
@@ -81,7 +81,7 @@ void apply_partial_kernel_row(cv::Mat& input, cv::Mat& output, std::vector<int>&
  * @param kernel The partial kernel (a vector of integers).
  * @param kernel_offset The offset of the kernel from the center of the column. For example, if kernel_offset = 1, then the kernel is applied to the column and its left neighbor. If kernel_offset = 2, then the kernel is applied to the column and its left and left-left neighbors.
  */
-void apply_partial_kernel_col(cv::Mat& input, cv::Mat& output, std::vector<int>& kernel, int kernel_offset) {
+void apply_partial_kernel_col(cv::Mat &input, cv::Mat &output, std::vector<int> &kernel, int kernel_offset) {
     int kernel_sum = 0;
     for (int i: kernel) {
         kernel_sum += i;
@@ -93,7 +93,7 @@ void apply_partial_kernel_col(cv::Mat& input, cv::Mat& output, std::vector<int>&
 #pragma omp parallel for default(none) shared(kernel_offset, input, output, kernel, kernel_sum)
     for (int row = 0; row < input.rows; row++) {
         for (int col = 0; col < input.cols; col++) {
-            cv::Vec3i buffer_result = cv::Vec3i {0, 0, 0};
+            cv::Vec3i buffer_result = cv::Vec3i{0, 0, 0};
             int kernel_idx = 0;
 
             for (int col_offset = -kernel_offset; col_offset <= kernel_offset; col_offset++) {
@@ -106,7 +106,7 @@ void apply_partial_kernel_col(cv::Mat& input, cv::Mat& output, std::vector<int>&
                 kernel_idx++;
             }
 
-            cv::Vec3b pixel = buffer_result/ kernel_sum;
+            cv::Vec3b pixel = buffer_result / kernel_sum;
             output.at<cv::Vec3b>(row, col) = pixel;
         }
     }
@@ -126,7 +126,7 @@ void apply_partial_kernel_col(cv::Mat& input, cv::Mat& output, std::vector<int>&
  * @param kernel The kernel to be used for both rows and columns (a vector of integers).
  * @param kernel_offset The offset of the kernel from the center of each pixel. For example, if kernel_offset = 1, then the kernel is a 3x3 matrix. If kernel_offset = 2, then the kernel is a 5x5 matrix.
  */
-void apply_kernel(cv::Mat& input, cv::Mat& output, std::vector<int>& kernel, int kernel_offset) {
+void apply_kernel(cv::Mat &input, cv::Mat &output, std::vector<int> &kernel, int kernel_offset) {
     cv::Mat intermediate = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
     output = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
 

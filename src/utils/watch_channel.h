@@ -14,7 +14,7 @@
  * The channel supports read and write operations, which are synchronized using a mutex.
  * @tparam T The type of data that the channel can hold.
  */
-template <typename T>
+template<typename T>
 class WatchChannel {
 public:
     /**
@@ -33,7 +33,7 @@ public:
     * @param output A reference to a variable of type T where the data will be stored.
     * @return 0 if the read operation is successful, or a non-zero error code otherwise.
     */
-    int read(T& output);
+    int read(T &output);
 
     /**
     * Writes the data to the channel from the input parameter.
@@ -41,7 +41,7 @@ public:
     * @param input A reference to a variable of type T that contains the data to be written.
     * @return 0 if the write operation is successful, or a non-zero error code otherwise.
     */
-    int write(T& input);
+    int write(T &input);
 
 private:
     T data; // The buffer that holds the data

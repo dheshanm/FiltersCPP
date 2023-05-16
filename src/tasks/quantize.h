@@ -13,7 +13,7 @@
 #include "task.h"
 #include "../constants.h"
 
-void quantize_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel) {
+void quantize_task(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel) {
     cv::Mat frame;
     inputChannel.read(frame);
     if (frame.empty()) {
@@ -25,7 +25,8 @@ void quantize_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& o
     outputChannel.write(output_frame);
 }
 
-void quantize_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel, ProcessorState& processorState) {
+void quantize_process(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel,
+                      ProcessorState &processorState) {
     Processor processor("Quantize", &processorState);
 
     processor.register_callback(quantize_task);
@@ -36,8 +37,9 @@ class QuantizedTask : public Task {
 public:
     explicit QuantizedTask(WatchChannel<cv::Mat> &outputChannel) : Task(QUANTIZED, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& input) {
-        processorThread = std::thread(quantize_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &input) {
+        processorThread = std::thread(quantize_process, std::ref(input), std::ref(*outputChannel),
+                                      std::ref(processorState));
     }
 };
 

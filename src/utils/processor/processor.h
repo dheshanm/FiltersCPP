@@ -53,7 +53,7 @@ public:
      * @param name A string that specifies the name of the processor.
      * @param state A pointer to a ProcessorState object that stores the state of the processor.
      */
-    explicit Processor(std::string name, ProcessorState* state);
+    explicit Processor(std::string name, ProcessorState *state);
 
     /**
      * A destructor that destroys the Processor object and frees the memory allocated for the ProcessorState object.
@@ -88,7 +88,7 @@ private:
     /**
      * A pointer to a ProcessorState object that stores the state of the processor.
      */
-    ProcessorState* state;
+    ProcessorState *state;
 
     /**
      * A pointer to a function that defines how the images are processed by the processor.
@@ -107,7 +107,7 @@ public:
      * @param name A string that specifies the name of the processor.
      * @param state A pointer to a ProcessorState object that stores the state of the processor.
      */
-    explicit DualInputProcessor(std::string name, ProcessorState* state);
+    explicit DualInputProcessor(std::string name, ProcessorState *state);
 
     /**
      * A destructor that destroys the DualInputProcessor object and frees the memory allocated for the ProcessorState object.
@@ -121,7 +121,8 @@ public:
      * @param callback A pointer to a function that takes three parameters: two references to WatchChannel<cv::Mat> objects and another reference to a WatchChannel<cv::Mat> object.
      * @return An integer value that indicates whether the registration was successful or not. Zero means success, non-zero means failure.
      */
-    int register_callback(void (*callback)(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::Mat> &input_2, WatchChannel<cv::Mat> &output));
+    int register_callback(void (*callback)(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::Mat> &input_2,
+                                           WatchChannel<cv::Mat> &output));
 
     /**
      * A method that starts the processing loop of the processor.
@@ -143,7 +144,7 @@ private:
     /**
      * A pointer to a ProcessorState object that stores the state of the processor.
      */
-    ProcessorState* state;
+    ProcessorState *state;
 
     /**
      * A pointer to a function that defines how the images are processed by the processor.

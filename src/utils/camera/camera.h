@@ -38,10 +38,11 @@ public:
     * @param frame a reference to a cv::Mat object where the captured frame will be stored
     * @return 0 if the frame was successfully captured, -1 otherwise
     */
-    int read(cv::Mat& frame);
+    int read(cv::Mat &frame);
+
 private:
     cv::VideoCapture videoCapture; // a cv::VideoCapture object that represents the camera device
-    int index; // an integer that stores the index of the camera device
+    [[maybe_unused]] int index; // an integer that stores the index of the camera device
 };
 
 

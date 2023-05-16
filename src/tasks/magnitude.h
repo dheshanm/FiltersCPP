@@ -9,7 +9,8 @@
 #include "../utils/watch_channel.h"
 #include "../utils/processor/processor.h"
 
-void magnitude_task(WatchChannel<cv::Mat>& input_channel_1, WatchChannel<cv::Mat>& input_channel_2, WatchChannel<cv::Mat>& output_channel) {
+void magnitude_task(WatchChannel<cv::Mat> &input_channel_1, WatchChannel<cv::Mat> &input_channel_2,
+                    WatchChannel<cv::Mat> &output_channel) {
     cv::Mat input_frame_1, input_frame_2;
 
     input_channel_1.read(input_frame_1);
@@ -23,7 +24,8 @@ void magnitude_task(WatchChannel<cv::Mat>& input_channel_1, WatchChannel<cv::Mat
     output_channel.write(output_frame);
 }
 
-void magnitude_process(WatchChannel<cv::Mat>& input_channel_1, WatchChannel<cv::Mat>& input_channel_2, WatchChannel<cv::Mat>& output_channel, ProcessorState& processorState) {
+void magnitude_process(WatchChannel<cv::Mat> &input_channel_1, WatchChannel<cv::Mat> &input_channel_2,
+                       WatchChannel<cv::Mat> &output_channel, ProcessorState &processorState) {
     DualInputProcessor processor("Magnitude", &processorState);
 
     processor.register_callback(magnitude_task);
@@ -34,8 +36,9 @@ class MagnitudeTask : public Task {
 public:
     explicit MagnitudeTask(WatchChannel<cv::Mat> &outputChannel) : Task(MAGNITUDE, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& input_1, WatchChannel<cv::Mat>& input_2) {
-        processorThread = std::thread(magnitude_process, std::ref(input_1), std::ref(input_2), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::Mat> &input_2) {
+        processorThread = std::thread(magnitude_process, std::ref(input_1), std::ref(input_2), std::ref(*outputChannel),
+                                      std::ref(processorState));
     }
 };
 

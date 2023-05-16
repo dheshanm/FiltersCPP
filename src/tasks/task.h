@@ -22,7 +22,7 @@ public:
      * @param name
      * @param outputChannel
      */
-    Task(std::string name, WatchChannel<cv::Mat>& outputChannel);
+    Task(std::string name, WatchChannel<cv::Mat> &outputChannel);
 
     /**
      * A destructor that destroys the Task object.
@@ -50,14 +50,14 @@ public:
      * A function that returns the output channel of the processor.
      * @return A WatchChannel object that stores the output channel of the processor.
      */
-    WatchChannel<cv::Mat>* get_output_channel();
+    WatchChannel<cv::Mat> *get_output_channel();
 
     /**
      * Name of the task.
      */
     std::string name;
 protected:
-    WatchChannel<cv::Mat>* outputChannel; // output channel of the processor
+    WatchChannel<cv::Mat> *outputChannel; // output channel of the processor
     ProcessorState processorState; // state of the processor
     std::thread processorThread; // thread that runs the processing loop
 };
@@ -74,11 +74,11 @@ int Task::display() {
     return 0;
 }
 
-WatchChannel<cv::Mat>* Task::get_output_channel() {
+WatchChannel<cv::Mat> *Task::get_output_channel() {
     return outputChannel;
 }
 
-Task::Task(std::string name, WatchChannel<cv::Mat>& outputChannel) {
+Task::Task(std::string name, WatchChannel<cv::Mat> &outputChannel) {
     this->name = std::move(name);
     this->outputChannel = &outputChannel;
 }

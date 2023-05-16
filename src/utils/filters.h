@@ -15,7 +15,7 @@
  * @param frame The input color image
  * @param output The output grayscale image
  */
-void grayscale(cv::Mat& frame, cv::Mat& output) {
+void grayscale(cv::Mat &frame, cv::Mat &output) {
     cv::cvtColor(frame, output, cv::COLOR_BGR2GRAY);
 }
 
@@ -26,7 +26,7 @@ void grayscale(cv::Mat& frame, cv::Mat& output) {
  * @param input The input image
  * @param output The output negative image
  */
-void negative(cv::Mat& input, cv::Mat& output) {
+void negative(cv::Mat &input, cv::Mat &output) {
     cv::bitwise_not(input, output);
 }
 
@@ -39,7 +39,7 @@ void negative(cv::Mat& input, cv::Mat& output) {
  * @param output The output blurred image
  * @param kernel The vector of filter coefficients
  */
-void blur5x5(cv::Mat& input, cv::Mat& output) {
+void blur5x5(cv::Mat &input, cv::Mat &output) {
     std::vector<int> kernel = {2, 4, 6, 4, 2};
     apply_kernel(input, output, kernel, 2);
 }
@@ -53,7 +53,7 @@ void blur5x5(cv::Mat& input, cv::Mat& output) {
  * @param input The input image
  * @param output The output horizontal gradient image
  */
-void sobel_x(cv::Mat& input, cv::Mat& output) {
+void sobel_x(cv::Mat &input, cv::Mat &output) {
     std::vector<int> kernel_1 = {1, 2, 1};
     std::vector<int> kernel_2 = {-1, 0, +1};
 
@@ -73,7 +73,7 @@ void sobel_x(cv::Mat& input, cv::Mat& output) {
  * @param input The input image
  * @param output The output vertical gradient image
  */
-void sobel_y(cv::Mat& input, cv::Mat& output) {
+void sobel_y(cv::Mat &input, cv::Mat &output) {
     std::vector<int> kernel_1 = {-1, 0, +1};
     std::vector<int> kernel_2 = {1, 2, 1};
 
@@ -94,14 +94,14 @@ void sobel_y(cv::Mat& input, cv::Mat& output) {
  * @param sobel_input_2 The vertical gradient image
  * @param output The output magnitude of the gradient image
  */
-void magnitude(cv::Mat& sobel_input_1, cv::Mat& sobel_input_2, cv::Mat& output) {
+void magnitude(cv::Mat &sobel_input_1, cv::Mat &sobel_input_2, cv::Mat &output) {
     if (sobel_input_1.rows != sobel_input_2.rows || sobel_input_1.cols != sobel_input_2.cols) {
         throw std::invalid_argument("Sobel inputs must be the same size");
     }
 
     output = cv::Mat::zeros(sobel_input_1.rows, sobel_input_1.cols, CV_8UC3);
 
-    # pragma omp parallel for default(none) shared(sobel_input_1, sobel_input_2, output)
+# pragma omp parallel for default(none) shared(sobel_input_1, sobel_input_2, output)
     for (int row_idx = 0; row_idx < sobel_input_1.rows; row_idx++) {
         for (int col_idx = 0; col_idx < sobel_input_1.cols; col_idx++) {
             cv::Vec3b pixel_1 = sobel_input_1.at<cv::Vec3b>(row_idx, col_idx);
@@ -124,7 +124,7 @@ void magnitude(cv::Mat& sobel_input_1, cv::Mat& sobel_input_2, cv::Mat& output) 
  * @param levels The number of levels for quantization
  * @param blur A flag indicating whether to blur the image or not before quantization. Default is true.
  */
-void quantize(cv::Mat& input, cv::Mat& output, int levels, bool blur = true) {
+void quantize(cv::Mat &input, cv::Mat &output, int levels, bool blur = true) {
     if (levels < 2) {
         throw std::invalid_argument("Levels must be greater than 1");
     }
@@ -140,7 +140,7 @@ void quantize(cv::Mat& input, cv::Mat& output, int levels, bool blur = true) {
 
     output = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
 
-    # pragma omp parallel for default(none) shared(input, output, bins_count)
+# pragma omp parallel for default(none) shared(input, output, bins_count)
     for (int row_idx = 0; row_idx < input.rows; row_idx++) {
         for (int col_idx = 0; col_idx < input.cols; col_idx++) {
             cv::Vec3b pixel = input.at<cv::Vec3b>(row_idx, col_idx);
@@ -163,14 +163,14 @@ void quantize(cv::Mat& input, cv::Mat& output, int levels, bool blur = true) {
  * @param output The output cartoonized image
  * @param magnitude_threshold The threshold for edge detection
  */
-void cartoonize(cv::Mat& quantized_input, cv::Mat& magnitude_input, cv::Mat& output, int magnitude_threshold) {
+void cartoonize(cv::Mat &quantized_input, cv::Mat &magnitude_input, cv::Mat &output, int magnitude_threshold) {
     if (quantized_input.rows != magnitude_input.rows || quantized_input.cols != magnitude_input.cols) {
         throw std::invalid_argument("Inputs must be the same size");
     }
 
     output = cv::Mat::zeros(quantized_input.rows, quantized_input.cols, CV_8UC3);
 
-    # pragma omp parallel for default(none) shared(quantized_input, magnitude_input, output, magnitude_threshold)
+# pragma omp parallel for default(none) shared(quantized_input, magnitude_input, output, magnitude_threshold)
     for (int row_idx = 0; row_idx < quantized_input.rows; row_idx++) {
         for (int col_idx = 0; col_idx < quantized_input.cols; col_idx++) {
             cv::Vec3b quantized_pixel = quantized_input.at<cv::Vec3b>(row_idx, col_idx);

@@ -13,7 +13,8 @@
 #include "task.h"
 #include "../constants.h"
 
-void cartoonize_task(WatchChannel<cv::Mat>& quantized_input, WatchChannel<cv::Mat>& magnitude_input, WatchChannel<cv::Mat>& output_channel) {
+void cartoonize_task(WatchChannel<cv::Mat> &quantized_input, WatchChannel<cv::Mat> &magnitude_input,
+                     WatchChannel<cv::Mat> &output_channel) {
     cv::Mat quantized_frame, magnitude_frame;
 
     quantized_input.read(quantized_frame);
@@ -27,7 +28,8 @@ void cartoonize_task(WatchChannel<cv::Mat>& quantized_input, WatchChannel<cv::Ma
     output_channel.write(output_frame);
 }
 
-void cartoonize_process(WatchChannel<cv::Mat>& input_channel_1, WatchChannel<cv::Mat>& input_channel_2, WatchChannel<cv::Mat>& output_channel, ProcessorState& processorState) {
+void cartoonize_process(WatchChannel<cv::Mat> &input_channel_1, WatchChannel<cv::Mat> &input_channel_2,
+                        WatchChannel<cv::Mat> &output_channel, ProcessorState &processorState) {
     DualInputProcessor processor("", &processorState);
 
     processor.register_callback(cartoonize_task);
@@ -38,8 +40,9 @@ class CartoonizeTask : public Task {
 public:
     explicit CartoonizeTask(WatchChannel<cv::Mat> &outputChannel) : Task(CARTOONIZE, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& quantized_input, WatchChannel<cv::Mat>& magnitude_input) {
-        processorThread = std::thread(cartoonize_process, std::ref(quantized_input), std::ref(magnitude_input), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &quantized_input, WatchChannel<cv::Mat> &magnitude_input) {
+        processorThread = std::thread(cartoonize_process, std::ref(quantized_input), std::ref(magnitude_input),
+                                      std::ref(*outputChannel), std::ref(processorState));
     }
 };
 

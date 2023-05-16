@@ -10,7 +10,7 @@
 #include "../utils/processor/processor.h"
 #include "../utils/filters.h"
 
-void sobel_x_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel) {
+void sobel_x_task(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel) {
     cv::Mat frame;
     inputChannel.read(frame);
     if (frame.empty()) {
@@ -21,7 +21,8 @@ void sobel_x_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& ou
     outputChannel.write(output);
 }
 
-void sobel_x_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel, ProcessorState& processorState) {
+void sobel_x_process(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel,
+                     ProcessorState &processorState) {
     Processor processor("Sobel X", &processorState);
 
     processor.register_callback(sobel_x_task);
@@ -32,12 +33,13 @@ class SobelXTask : public Task {
 public:
     explicit SobelXTask(WatchChannel<cv::Mat> &outputChannel) : Task(SOBEL_X, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& input) {
-        processorThread = std::thread(sobel_x_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &input) {
+        processorThread = std::thread(sobel_x_process, std::ref(input), std::ref(*outputChannel),
+                                      std::ref(processorState));
     }
 };
 
-void sobel_y_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel) {
+void sobel_y_task(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel) {
     cv::Mat frame;
     inputChannel.read(frame);
     if (frame.empty()) {
@@ -48,7 +50,8 @@ void sobel_y_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& ou
     outputChannel.write(output);
 }
 
-void sobel_y_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel, ProcessorState& processorState) {
+void sobel_y_process(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel,
+                     ProcessorState &processorState) {
     Processor processor("Sobel Y", &processorState);
 
     processor.register_callback(sobel_y_task);
@@ -59,8 +62,9 @@ class SobelYTask : public Task {
 public:
     explicit SobelYTask(WatchChannel<cv::Mat> &outputChannel) : Task(SOBEL_Y, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& input) {
-        processorThread = std::thread(sobel_y_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &input) {
+        processorThread = std::thread(sobel_y_process, std::ref(input), std::ref(*outputChannel),
+                                      std::ref(processorState));
     }
 };
 

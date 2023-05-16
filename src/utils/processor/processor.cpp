@@ -69,12 +69,15 @@ DualInputProcessor::DualInputProcessor(std::string name, ProcessorState *state) 
     this->callback = nullptr;
 }
 
-int DualInputProcessor::register_callback(void (*callback_input)(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::Mat> &input_2, WatchChannel<cv::Mat> &output)) {
+int DualInputProcessor::register_callback(
+        void (*callback_input)(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::Mat> &input_2,
+                               WatchChannel<cv::Mat> &output)) {
     this->callback = callback_input;
     return 0;
 }
 
-int DualInputProcessor::start(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::Mat> &input_2, WatchChannel<cv::Mat> &output) {
+int DualInputProcessor::start(WatchChannel<cv::Mat> &input_1, WatchChannel<cv::Mat> &input_2,
+                              WatchChannel<cv::Mat> &output) {
 
     if (this->callback == nullptr) {
         std::cout << "Callback not registered." << std::endl;

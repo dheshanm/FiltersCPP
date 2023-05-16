@@ -10,7 +10,7 @@
 #include "../utils/processor/processor.h"
 #include "../utils/filters.h"
 
-void negative_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel) {
+void negative_task(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel) {
     cv::Mat frame;
     inputChannel.read(frame);
     if (frame.empty()) {
@@ -22,7 +22,8 @@ void negative_task(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& o
     outputChannel.write(negative_frame);
 }
 
-void negative_process(WatchChannel<cv::Mat>& inputChannel, WatchChannel<cv::Mat>& outputChannel, ProcessorState& processorState) {
+void negative_process(WatchChannel<cv::Mat> &inputChannel, WatchChannel<cv::Mat> &outputChannel,
+                      ProcessorState &processorState) {
     Processor processor("Negative", &processorState);
 
     processor.register_callback(negative_task);
@@ -33,8 +34,9 @@ class NegativeTask : public Task {
 public:
     explicit NegativeTask(WatchChannel<cv::Mat> &outputChannel) : Task(NEGATIVE, outputChannel) {}
 
-    void start(WatchChannel<cv::Mat>& input) {
-        processorThread = std::thread(negative_process, std::ref(input), std::ref(*outputChannel), std::ref(processorState));
+    void start(WatchChannel<cv::Mat> &input) {
+        processorThread = std::thread(negative_process, std::ref(input), std::ref(*outputChannel),
+                                      std::ref(processorState));
     }
 };
 

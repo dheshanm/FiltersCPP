@@ -21,7 +21,7 @@ void Camera::set_fps(int fps) {
     videoCapture.set(cv::CAP_PROP_FPS, fps);
 }
 
-int Camera::read(cv::Mat& frame) {
+int Camera::read(cv::Mat &frame) {
     videoCapture >> frame;
     if (frame.empty()) {
         std::cout << "Failed to capture frame." << std::endl;
