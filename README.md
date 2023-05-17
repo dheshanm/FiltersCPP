@@ -25,3 +25,5 @@ This is a collection of filters implemented in C++, using [OpenCV](https://openc
 - Each process uses a Processor class, 
   - that contains logic to compute frame-time and fps, for each frame.
   - holds a pointer to the function that is used to process the frame (Filters).
+
+![Architecture ](assets/arch.png)
