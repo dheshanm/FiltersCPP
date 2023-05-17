@@ -1,6 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Dheshan Mohandass (L4TTiCe)
 //
-// Created by master on 5/15/23.
-//
+// SPDX-License-Identifier: MIT
 
 #ifndef VISION_CPP_QUANTIZE_H
 #define VISION_CPP_QUANTIZE_H

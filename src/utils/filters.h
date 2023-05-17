@@ -1,6 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Dheshan Mohandass (L4TTiCe)
 //
-// Created by master on 5/14/23.
-//
+// SPDX-License-Identifier: MIT
 
 #ifndef VISION_CPP_FILTERS_H
 #define VISION_CPP_FILTERS_H
@@ -57,11 +57,11 @@ void sobel_x(cv::Mat &input, cv::Mat &output) {
     std::vector<int> kernel_1 = {1, 2, 1};
     std::vector<int> kernel_2 = {-1, 0, +1};
 
-    cv::Mat intermediate = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
+//    cv::Mat intermediate = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
     output = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
 
-    apply_partial_kernel_row(input, intermediate, kernel_1, 1);
-    apply_partial_kernel_col(intermediate, output, kernel_2, 1);
+//    apply_partial_kernel_row(input, intermediate, kernel_1, 1);
+    apply_partial_kernel_col(input, output, kernel_2, 1);
 }
 
 /**
@@ -77,11 +77,11 @@ void sobel_y(cv::Mat &input, cv::Mat &output) {
     std::vector<int> kernel_1 = {-1, 0, +1};
     std::vector<int> kernel_2 = {1, 2, 1};
 
-    cv::Mat intermediate = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
+//    cv::Mat intermediate = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
     output = cv::Mat::zeros(input.rows, input.cols, CV_8UC3);
 
-    apply_partial_kernel_row(input, intermediate, kernel_1, 1);
-    apply_partial_kernel_col(intermediate, output, kernel_2, 1);
+    apply_partial_kernel_row(input, output, kernel_1, 1);
+//    apply_partial_kernel_col(intermediate, output, kernel_2, 1);
 }
 
 /**

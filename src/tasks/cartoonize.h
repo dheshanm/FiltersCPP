@@ -1,6 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Dheshan Mohandass (L4TTiCe)
 //
-// Created by master on 5/15/23.
-//
+// SPDX-License-Identifier: MIT
 
 #ifndef VISION_CPP_CARTOONIZE_H
 #define VISION_CPP_CARTOONIZE_H
@@ -24,7 +24,7 @@ void cartoonize_task(WatchChannel<cv::Mat> &quantized_input, WatchChannel<cv::Ma
         return;
     }
     cv::Mat output_frame;
-    cartoonize(quantized_frame, magnitude_frame, output_frame, 20);
+    cartoonize(quantized_frame, magnitude_frame, output_frame, 15);
     output_channel.write(output_frame);
 }
 

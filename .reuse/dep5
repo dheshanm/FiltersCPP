@@ -1,0 +1,18 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Filtering (C++)
+Upstream-Contact: Dheshan Mohandass (L4TTiCe) <dheshan@mohandass.com>
+Source: https://github.com/L4TTiCe/FiltersCPP
+
+# Sample paragraph, commented out:
+#
+# Files: src/*
+# Copyright: $YEAR $NAME <$CONTACT>
+# License: ...
+
+Files: .idea/* .gitignore
+Copyright: 2023 Dheshan Mohandass (L4TTiCe) <dheshan@mohandass.com>
+License: MIT
+
+Files: CMakeLists.txt README.md
+Copyright: 2023 Dheshan Mohandass (L4TTiCe) <dheshan@mohandass.com>
+License: MIT

@@ -1,6 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Dheshan Mohandass (L4TTiCe)
 //
-// Created by master on 5/14/23.
-//
+// SPDX-License-Identifier: MIT
 
 #ifndef VISION_CPP_TASK_H
 #define VISION_CPP_TASK_H
