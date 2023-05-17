@@ -17,15 +17,15 @@
 #include "tasks/quantize.h"
 #include "tasks/cartoonize.h"
 
-[[noreturn]] void fetch_frame(Camera &camera, WatchChannel<cv::Mat> &watchChannel) {
-    while (true) {
+void fetch_frame(Camera &camera, WatchChannel<cv::Mat> &outputChannel, bool &isRunning) {
+    while (isRunning) {
         cv::Mat frame;
         camera.read(frame);
         if (frame.empty()) {
             std::cout << "Fetch: " << "Failed to capture frame." << std::endl;
             continue;
         }
-        watchChannel.write(frame);
+        outputChannel.write(frame);
     }
 }
 
@@ -107,8 +107,9 @@ int main() {
     channels[MAIN] = new WatchChannel<cv::Mat>();
 
     int key_pressed;
+    bool is_camera_enabled = true;
 
-    std::thread fetch_thread(fetch_frame, std::ref(camera), std::ref(*channels[MAIN]));
+    std::thread fetch_thread(fetch_frame, std::ref(camera), std::ref(*channels[MAIN]), std::ref(is_camera_enabled));
 
     bool is_running = true;
     while (is_running) {
@@ -166,6 +167,21 @@ int main() {
 
                 break;
             }
+            case 100: { // d
+                std::cout << "Key pressed: [D] " << key_pressed << std::endl;
+
+                if (is_camera_enabled) {
+                    is_camera_enabled = false;
+                    fetch_thread.join();
+                    std::cout << "Paused camera" << std::endl;
+                } else {
+                    is_camera_enabled = true;
+                    fetch_thread = std::thread(fetch_frame, std::ref(camera), std::ref(*channels[MAIN]), std::ref(is_camera_enabled));
+                    std::cout << "Resumed camera" << std::endl;
+                }
+
+                break;
+            }
             case 102: { // f
                 std::cout << "Key pressed: [F] " << key_pressed << std::endl;
                 for (auto &pair: tasks) {
@@ -214,7 +230,6 @@ int main() {
                 } else {
                     stop_task(QUANTIZED, tasks);
                 }
-
 
                 break;
             }
