@@ -1,6 +1,5 @@
 ## FiltersCPP
-
-This is a collection of filters implemented in C++, using [OpenCV](https://opencv.org/).
+FiltersCPP is a collection of filters implemented in C++, using [OpenCV](https://opencv.org/). It uses CMake to build, OpenMP to parallelize, and can compute the frame-time and fps for each filter.
 
 ### Filters
 1. Blur
